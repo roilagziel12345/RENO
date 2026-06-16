@@ -11,10 +11,6 @@
     "dependencies",
     "renovate"
   ],
-  "schedule": [
-    "after 9pm and before 6am every weekday",
-    "every weekend"
-  ],
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
   "rangeStrategy": "bump",
