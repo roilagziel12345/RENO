@@ -1,1 +1,1 @@
-{"name":"platform-admin","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('platform-admin ok')\""},"dependencies":{"vue":"2.6.14","axios":"0.24.0"}}
+{"name":"platform-admin","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('platform-admin ok')\""},"dependencies":{"vue":"2.6.14","axios":"0.33.0"}}
