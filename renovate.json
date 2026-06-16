@@ -65,7 +65,7 @@
       ],
       "automerge": true,
       "automergeType": "pr",
-      "stabilityDays": 2
+      "minimumReleaseAge": "2 days"
     },
     {
       "description": "Keep major updates isolated for client review.",
