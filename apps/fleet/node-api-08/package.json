@@ -1,0 +1,1 @@
+{"name":"node-api-08","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('node-api-08 ok')\""},"dependencies":{"axios":"0.26.1","qs":"6.10.1"}}

@@ -1,0 +1,1 @@
+{"name":"platform-gateway","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('platform-gateway ok')\""},"dependencies":{"express":"4.17.1","http-proxy-middleware":"2.0.1"}}

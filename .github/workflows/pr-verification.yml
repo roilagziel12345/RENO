@@ -15,64 +15,19 @@ permissions:
   pull-requests: read
 
 jobs:
-  changes:
-    name: Detect changed apps
+  dependency-manifest-tests:
+    name: Dynamic dependency manifest tests
     runs-on: ubuntu-latest
-    outputs:
-      frontend-node: ${{ steps.filter.outputs.frontend-node }}
-      backend-java: ${{ steps.filter.outputs.backend-java }}
-      data-python: ${{ steps.filter.outputs.data-python }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Detect dependency updates
-        id: filter
-        uses: dorny/paths-filter@v3
         with:
-          filters: |
-            frontend-node:
-              - 'apps/frontend-node/package.json'
-              - 'apps/frontend-node/package-lock.json'
-            backend-java:
-              - 'apps/backend-java/pom.xml'
-            data-python:
-              - 'apps/data-python/requirements.txt'
-
-  frontend-node:
-    name: Test frontend-node
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.frontend-node == 'true'
-    defaults:
-      run:
-        working-directory: apps/frontend-node
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-  backend-java:
-    name: Test backend-java
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.backend-java == 'true'
-    defaults:
-      run:
-        working-directory: apps/backend-java
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -81,42 +36,60 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Test
-        run: mvn test
-
-  data-python:
-    name: Test data-python
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.data-python == 'true'
-    defaults:
-      run:
-        working-directory: apps/data-python
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-          cache-dependency-path: apps/data-python/requirements.txt
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Test changed dependency manifests
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: Test
-        run: pytest
+          base_ref="${{ github.event.pull_request.base.sha }}"
+          head_ref="${{ github.event.pull_request.head.sha }}"
+          mapfile -t changed_files < <(git diff --name-only "$base_ref" "$head_ref")
 
-  no-app-changes:
-    name: No app dependency changes
-    runs-on: ubuntu-latest
-    needs: changes
-    if: |
-      needs.changes.outputs.frontend-node != 'true' &&
-      needs.changes.outputs.backend-java != 'true' &&
-      needs.changes.outputs.data-python != 'true'
-    steps:
-      - name: Skip app tests
-        run: echo "No app dependency manifests changed."
+          declare -A node_dirs=()
+          declare -A maven_dirs=()
+          declare -A python_dirs=()
+
+          for file in "${changed_files[@]}"; do
+            case "$file" in
+              */node_modules/*) ;;
+              */package.json|package.json) node_dirs["$(dirname "$file")"]=1 ;;
+              */package-lock.json|package-lock.json) node_dirs["$(dirname "$file")"]=1 ;;
+              */pom.xml|pom.xml) maven_dirs["$(dirname "$file")"]=1 ;;
+              */requirements.txt|requirements.txt) python_dirs["$(dirname "$file")"]=1 ;;
+            esac
+          done
+
+          if (( ${#node_dirs[@]} == 0 && ${#maven_dirs[@]} == 0 && ${#python_dirs[@]} == 0 )); then
+            echo "No dependency manifests changed."
+            exit 0
+          fi
+
+          for dir in "${!node_dirs[@]}"; do
+            echo "::group::npm test: $dir"
+            npm --prefix "$dir" install
+            npm --prefix "$dir" test
+            echo "::endgroup::"
+          done
+
+          for dir in "${!maven_dirs[@]}"; do
+            echo "::group::maven test: $dir"
+            mvn -f "$dir/pom.xml" test
+            echo "::endgroup::"
+          done
+
+          for dir in "${!python_dirs[@]}"; do
+            echo "::group::python test: $dir"
+            python -m pip install -r "$dir/requirements.txt"
+            if find "$dir" -maxdepth 2 \( -name "test_*.py" -o -name "*_test.py" \) | grep -q .; then
+              python -m pytest "$dir"
+            else
+              echo "No pytest tests found under $dir; dependency install is the verification."
+            fi
+            echo "::endgroup::"
+          done

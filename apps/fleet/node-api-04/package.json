@@ -1,0 +1,1 @@
+{"name":"node-api-04","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('node-api-04 ok')\""},"dependencies":{"express":"4.18.1","minimist":"1.2.5"}}
