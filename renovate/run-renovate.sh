@@ -9,6 +9,6 @@ docker run --rm \
   -e RENOVATE_PLATFORM="${RENOVATE_PLATFORM:-github}" \
   -e RENOVATE_ENDPOINT="${RENOVATE_ENDPOINT:-}" \
   -e RENOVATE_REPOSITORIES \
+  -e RENOVATE_REQUIRE_CONFIG=required \
   -e LOG_LEVEL="${LOG_LEVEL:-info}" \
-  -v "$(pwd)/renovate.json:/usr/src/app/config.json:ro" \
   renovate/renovate:latest
