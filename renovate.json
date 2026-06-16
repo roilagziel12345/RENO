@@ -16,6 +16,7 @@
   "branchConcurrentLimit": 31,
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch",
+  "recreateWhen": "always",
   "automergeStrategy": "squash",
   "platformAutomerge": true,
   "packageRules": [
