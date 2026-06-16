@@ -14,63 +14,17 @@
   "prConcurrentLimit": 31,
   "prHourlyLimit": 31,
   "branchConcurrentLimit": 31,
+  "prCreation": "immediate",
+  "dependencyDashboardApproval": false,
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch",
   "recreateWhen": "always",
-  "automergeStrategy": "squash",
-  "platformAutomerge": true,
+  "automerge": false,
+  "platformAutomerge": false,
   "packageRules": [
     {
-      "description": "Group low-risk non-major npm updates.",
-      "matchManagers": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "npm minor and patch dependencies",
-      "groupSlug": "npm-minor-patch"
-    },
-    {
-      "description": "Group low-risk non-major Maven updates.",
-      "matchManagers": [
-        "maven"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "maven minor and patch dependencies",
-      "groupSlug": "maven-minor-patch"
-    },
-    {
-      "description": "Group low-risk non-major Python updates.",
-      "matchManagers": [
-        "pip_requirements"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "python minor and patch dependencies",
-      "groupSlug": "python-minor-patch"
-    },
-    {
-      "description": "Automerge patch updates after CI passes.",
-      "matchUpdateTypes": [
-        "patch"
-      ],
-      "automerge": true,
-      "automergeType": "pr",
-      "minimumReleaseAge": "2 days"
-    },
-    {
-      "description": "Keep major updates isolated for client review.",
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "dependencyDashboardApproval": true,
+      "description": "Label major updates but still open PRs in demo mode.",
+      "matchUpdateTypes": ["major"],
       "labels": [
         "dependencies",
         "renovate",
