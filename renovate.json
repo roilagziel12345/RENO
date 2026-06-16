@@ -1,0 +1,83 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    ":timezone(Asia/Jerusalem)"
+  ],
+  "labels": [
+    "dependencies",
+    "renovate"
+  ],
+  "schedule": [
+    "after 9pm and before 6am every weekday",
+    "every weekend"
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "rangeStrategy": "bump",
+  "rebaseWhen": "behind-base-branch",
+  "automergeStrategy": "squash",
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Group low-risk non-major npm updates.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "npm minor and patch dependencies",
+      "groupSlug": "npm-minor-patch"
+    },
+    {
+      "description": "Group low-risk non-major Maven updates.",
+      "matchManagers": [
+        "maven"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "maven minor and patch dependencies",
+      "groupSlug": "maven-minor-patch"
+    },
+    {
+      "description": "Group low-risk non-major Python updates.",
+      "matchManagers": [
+        "pip_requirements"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "python minor and patch dependencies",
+      "groupSlug": "python-minor-patch"
+    },
+    {
+      "description": "Automerge patch updates after CI passes.",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "stabilityDays": 2
+    },
+    {
+      "description": "Keep major updates isolated for client review.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true,
+      "labels": [
+        "dependencies",
+        "renovate",
+        "major-update"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+services:
+  renovate:
+    image: renovate/renovate:latest
+    environment:
+      RENOVATE_TOKEN: ${RENOVATE_TOKEN}
+      RENOVATE_PLATFORM: ${RENOVATE_PLATFORM:-github}
+      RENOVATE_ENDPOINT: ${RENOVATE_ENDPOINT:-}
+      RENOVATE_REPOSITORIES: ${RENOVATE_REPOSITORIES}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - ../renovate.json:/usr/src/app/config.json:ro
+    command: --config-file=/usr/src/app/config.json
