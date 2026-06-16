@@ -11,9 +11,9 @@
     "dependencies",
     "renovate"
   ],
-  "prConcurrentLimit": 30,
-  "prHourlyLimit": 30,
-  "branchConcurrentLimit": 30,
+  "prConcurrentLimit": 31,
+  "prHourlyLimit": 31,
+  "branchConcurrentLimit": 31,
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch",
   "automergeStrategy": "squash",
