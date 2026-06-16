@@ -1,1 +1,1 @@
-{"name":"node-api-01","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('node-api-01 ok')\""},"dependencies":{"express":"4.16.4","lodash":"4.17.20"}}
+{"name":"node-api-01","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('node-api-01 ok')\""},"dependencies":{"express":"4.22.2","lodash":"4.17.20"}}
