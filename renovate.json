@@ -11,6 +11,9 @@
     "dependencies",
     "renovate"
   ],
+  "enabledManagers": [
+    "maven"
+  ],
   "prConcurrentLimit": 31,
   "prHourlyLimit": 31,
   "branchConcurrentLimit": 31,
