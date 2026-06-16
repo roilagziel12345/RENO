@@ -25,5 +25,3 @@ jobs:
           RENOVATE_PLATFORM: github
           RENOVATE_REPOSITORIES: ${{ github.repository }}
           LOG_LEVEL: info
-        with:
-          args: --config-file=renovate.json

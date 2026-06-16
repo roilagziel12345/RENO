@@ -11,5 +11,4 @@ docker run --rm \
   -e RENOVATE_REPOSITORIES \
   -e LOG_LEVEL="${LOG_LEVEL:-info}" \
   -v "$(pwd)/renovate.json:/usr/src/app/config.json:ro" \
-  renovate/renovate:latest \
-  --config-file=/usr/src/app/config.json
+  renovate/renovate:latest

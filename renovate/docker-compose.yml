@@ -9,4 +9,3 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - ../renovate.json:/usr/src/app/config.json:ro
-    command: --config-file=/usr/src/app/config.json
