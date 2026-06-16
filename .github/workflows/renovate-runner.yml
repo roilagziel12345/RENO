@@ -16,6 +16,10 @@ permissions:
   pull-requests: write
   issues: write
 
+concurrency:
+  group: renovate-runner
+  cancel-in-progress: false
+
 jobs:
   renovate:
     name: Run self-hosted Renovate
