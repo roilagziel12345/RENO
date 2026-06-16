@@ -1,1 +1,1 @@
-{"name":"node-api-07","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('node-api-07 ok')\""},"dependencies":{"hapi":"18.1.0","joi":"17.6.0"}}
+{"name":"node-api-07","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('node-api-07 ok')\""},"dependencies":{"hapi":"18.1.0","joi":"17.13.4"}}
