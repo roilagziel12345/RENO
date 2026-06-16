@@ -13,6 +13,6 @@
     "react": "17.0.2"
   },
   "devDependencies": {
-    "supertest": "6.1.6"
+    "supertest": "6.3.4"
   }
 }
