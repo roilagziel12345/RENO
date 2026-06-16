@@ -1,1 +1,1 @@
-{"name":"commerce-worker","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('commerce-worker ok')\""},"dependencies":{"bull":"4.8.0","ioredis":"4.28.5"}}
+{"name":"commerce-worker","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('commerce-worker ok')\""},"dependencies":{"bull":"4.8.0","ioredis":"4.31.0"}}
