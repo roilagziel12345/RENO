@@ -1,0 +1,62 @@
+pipeline {
+  agent any
+
+  options {
+    disableConcurrentBuilds(abortPrevious: false)
+    buildDiscarder(logRotator(numToKeepStr: '30'))
+    timeout(time: 60, unit: 'MINUTES')
+  }
+
+  parameters {
+    string(
+      name: 'RENOVATE_REPOSITORIES',
+      defaultValue: '',
+      description: 'Comma-separated owner/repo list. Leave empty to use renovate/repositories.json.'
+    )
+    choice(
+      name: 'LOG_LEVEL',
+      choices: ['info', 'debug'],
+      description: 'Renovate log level.'
+    )
+  }
+
+  environment {
+    RENOVATE_PLATFORM = "${env.RENOVATE_PLATFORM ?: 'github'}"
+    RENOVATE_ENDPOINT = "${env.RENOVATE_ENDPOINT ?: ''}"
+    RENOVATE_REQUIRE_CONFIG = 'optional'
+  }
+
+  stages {
+    stage('Validate Inputs') {
+      steps {
+        script {
+          if (!env.RENOVATE_TOKEN) {
+            error('RENOVATE_TOKEN must be provided as a Jenkins credential or environment variable.')
+          }
+          if (!params.RENOVATE_REPOSITORIES?.trim() && !fileExists('renovate/repositories.json')) {
+            error('Set RENOVATE_REPOSITORIES or provide renovate/repositories.json.')
+          }
+        }
+      }
+    }
+
+    stage('Run Renovate') {
+      steps {
+        sh '''
+          set -eu
+
+          docker run --rm \
+            -v "$PWD:/usr/src/app:ro" \
+            -w /usr/src/app \
+            -e RENOVATE_TOKEN \
+            -e RENOVATE_PLATFORM \
+            -e RENOVATE_ENDPOINT \
+            -e RENOVATE_REQUIRE_CONFIG \
+            -e RENOVATE_REPOSITORIES="${RENOVATE_REPOSITORIES}" \
+            -e LOG_LEVEL="${LOG_LEVEL}" \
+            renovate/renovate:latest
+        '''
+      }
+    }
+  }
+}

@@ -11,11 +11,11 @@
     "dependencies",
     "renovate"
   ],
-  "prConcurrentLimit": 31,
-  "prHourlyLimit": 31,
-  "branchConcurrentLimit": 31,
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "branchConcurrentLimit": 10,
   "prCreation": "immediate",
-  "dependencyDashboardApproval": false,
+  "dependencyDashboard": true,
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch",
   "recreateWhen": "always",
@@ -23,8 +23,20 @@
   "platformAutomerge": false,
   "packageRules": [
     {
-      "description": "Label major updates but still open PRs in demo mode.",
-      "matchUpdateTypes": ["major"],
+      "description": "Group low-risk non-major updates to reduce CI pressure.",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "minor and patch dependency updates",
+      "groupSlug": "minor-patch"
+    },
+    {
+      "description": "Require dashboard approval for major updates.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true,
       "labels": [
         "dependencies",
         "renovate",
