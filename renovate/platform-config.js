@@ -34,6 +34,8 @@ module.exports = {
   onboarding: false,
   requireConfig: "optional",
   dependencyDashboard: true,
+  dependencyDashboardApproval: true,
+  dependencyDashboardTitle: "Renovate Dependency Approval Dashboard",
   labels: ["dependencies", "renovate"],
   prConcurrentLimit: 5,
   prHourlyLimit: 2,
@@ -46,15 +48,14 @@ module.exports = {
   platformAutomerge: false,
   packageRules: [
     {
-      description: "Group low-risk non-major updates to reduce CI pressure.",
+      description: "Group low-risk non-major updates after dashboard approval.",
       matchUpdateTypes: ["minor", "patch"],
       groupName: "minor and patch dependency updates",
       groupSlug: "minor-patch",
     },
     {
-      description: "Require dashboard approval for major updates.",
+      description: "Label major updates for client review.",
       matchUpdateTypes: ["major"],
-      dependencyDashboardApproval: true,
       labels: ["dependencies", "renovate", "major-update"],
     },
   ],

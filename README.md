@@ -20,7 +20,8 @@ Default safety controls:
 - `branchConcurrentLimit: 10`
 - no automerge
 - minor and patch updates grouped together
-- major updates require Dependency Dashboard approval
+- all updates require Dependency Dashboard approval before PR creation
+- major updates are labelled for client review
 
 Renovate discovers manifests recursively. You do not need to provide paths for `package.json`, `pom.xml`, `requirements.txt`, or nested monorepo services.
 
@@ -56,3 +57,18 @@ export RENOVATE_REPOSITORIES=owner/repo-a,owner/repo-b
 - Python install/tests for changed `requirements.txt`
 
 This prevents Renovate PR bursts from triggering full monorepo builds for every dependency update.
+
+## Issue-first approval workflow
+
+Renovate is configured with `dependencyDashboardApproval: true`. That means the
+first output is a Dependency Dashboard issue in each target repository. Renovate
+does not open a PR or trigger CI until an approved user checks an update in that
+issue.
+
+Flow:
+
+1. Renovate scans the repo and updates the dashboard issue.
+2. The client/admin reviews available updates in the issue.
+3. The client/admin checks the update they want.
+4. Renovate opens the PR in that same application repo.
+5. CI runs only for the app directories touched by the PR.
