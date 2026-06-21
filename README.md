@@ -1,74 +1,26 @@
-﻿# RENO
+# Minimal self-hosted Renovate runner
 
-Proof-of-concept monorepo for evaluating Mend Renovate across mixed Node.js, Maven, and Python dependency manifests.
+This is an on-prem Docker runner for Renovate. It automatically discovers supported dependency files anywhere in the selected repositories, including nested `package.json`, `pom.xml`, and `requirements.txt`, then opens GitHub pull requests for available updates.
 
-## Large-scale Renovate runner
+## Setup
 
-The scale-safe runner lives in `config.js`, which loads `renovate/platform-config.js`. It is designed for one Renovate job per security boundary or client group, not one job per repository.
+Copy `.env.example` to `.env` and set `RENOVATE_TOKEN` to a GitHub PAT or GitHub App token that can read repositories and create branches and pull requests. `.env` is ignored by Git; no secret is stored in source control.
 
-Repository targets can be supplied in either of these ways:
-
-- `RENOVATE_REPOSITORIES=owner/repo-a,owner/repo-b`
-- `renovate/repositories.json`, using `renovate/repositories.example.json` as the template
-
-The real `renovate/repositories.json` is gitignored so private client repo names do not have to be committed.
-
-Default safety controls:
-
-- `prConcurrentLimit: 5`
-- `prHourlyLimit: 2`
-- `branchConcurrentLimit: 10`
-- no automerge
-- minor and patch updates grouped together
-- all updates require Dependency Dashboard approval before PR creation
-- major updates are labelled for client review
-
-Renovate discovers manifests recursively. You do not need to provide paths for `package.json`, `pom.xml`, `requirements.txt`, or nested monorepo services.
-
-## Running Renovate
-
-GitHub Actions:
-
-- `.github/workflows/renovate-runner.yml`
-- manually with `workflow_dispatch`
-- nightly on the configured cron
-- optionally with a comma-separated repository list input
-
-Jenkins:
-
-- central runner: `renovate/Jenkinsfile`
-- set `RENOVATE_TOKEN` as a Jenkins credential/environment variable
-- optionally pass `RENOVATE_REPOSITORIES`
-
-Local Docker:
-
-```sh
-export RENOVATE_TOKEN=...
-export RENOVATE_REPOSITORIES=owner/repo-a,owner/repo-b
-./renovate/run-renovate.sh
+```powershell
+Copy-Item .env.example .env
+docker compose run --rm renovate
 ```
 
-## PR verification
+## Repositories
 
-`Jenkinsfile` and `.github/workflows/pr-verification.yml` both detect changed dependency manifests and run only the relevant verification:
+Edit only `repositoryUrls` in `config.js`. Each entry must be a full HTTPS GitHub clone URL, for example `https://github.com/owner/repository.git`. Do not provide file paths: Renovate scans the entire repository itself. The config converts URLs internally because Renovate's GitHub API accepts `owner/repository` identifiers.
 
-- npm tests for changed `package.json` or `package-lock.json`
-- Maven tests for changed `pom.xml`
-- Python install/tests for changed `requirements.txt`
+`onboarding: false` and `requireConfig: 'ignored'` allow this one central config to process each repository. Pull requests are created automatically when updates are found; branch protection and the repository's checks still control merging.
 
-This prevents Renovate PR bursts from triggering full monorepo builds for every dependency update.
+## Schedule
 
-## Issue-first approval workflow
+Use `cron/renovate.cron` on the on-prem runner host. Change `/opt/renovate-runner` to the deployment directory, create its `logs` directory, then install it with `crontab -e`. The supplied entry runs daily at 02:00 local server time and writes to `logs/renovate.log`.
 
-Renovate is configured with `dependencyDashboardApproval: true`. That means the
-first output is a Dependency Dashboard issue in each target repository. Renovate
-does not open a PR or trigger CI until an approved user checks an update in that
-issue.
+## Renovate PR checks
 
-Flow:
-
-1. Renovate scans the repo and updates the dashboard issue.
-2. The client/admin reviews available updates in the issue.
-3. The client/admin checks the update they want.
-4. Renovate opens the PR in that same application repo.
-5. CI runs only for the app directories touched by the PR.
+`.github/workflows/pr-verification.yml` runs for pull requests that modify dependency manifests. It executes `npm install` and `npm test` for Node, `mvn test` for Maven, and installs Python requirements followed by `pytest` when tests exist.

@@ -1,0 +1,9 @@
+services:
+  renovate:
+    image: renovate/renovate:latest
+    environment:
+      RENOVATE_TOKEN: ${RENOVATE_TOKEN:?Set RENOVATE_TOKEN in .env or the environment}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      RENOVATE_CONFIG_FILE: /usr/src/app/config.js
+    volumes:
+      - ./config.js:/usr/src/app/config.js:ro
