@@ -1,2 +1,0 @@
-# Daily at 02:00 server time. Change /opt/renovate-runner to the deployment directory.
-0 2 * * * cd /opt/renovate-runner && /usr/bin/docker compose run --rm renovate >> logs/renovate.log 2>&1

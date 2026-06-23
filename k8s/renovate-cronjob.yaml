@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: renovate
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: renovate
+              image: renovate/renovate:latest
+              env:
+                - name: RENOVATE_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: renovate-token
+                      key: RENOVATE_TOKEN
+                - name: RENOVATE_CONFIG_FILE
+                  value: /usr/src/app/config.js
+              volumeMounts:
+                - name: config
+                  mountPath: /usr/src/app/config.js
+                  subPath: config.js
+                  readOnly: true
+          volumes:
+            - name: config
+              configMap:
+                name: renovate-config

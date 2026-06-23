@@ -1,28 +1,27 @@
-# Minimal self-hosted Renovate runner
+# Renovate on Kind
 
-This is an on-prem Docker runner for Renovate. It scans nested `package.json`, `pom.xml`, and `requirements.txt` files, then opens GitHub pull requests for available updates.
+Only two files run Renovate: `config.js` and `k8s/renovate-cronjob.yaml`.
 
-The runner consists of only four operational files: `config.js`, `compose.yaml`, `.env`, and `cron/renovate.cron`.
+Edit the full GitHub URLs in `config.js`. Renovate scans each repository recursively and opens pull requests for dependency updates.
 
-## Setup
-
-Copy `.env.example` to `.env` and set `RENOVATE_TOKEN` to a GitHub PAT or GitHub App token that can read repositories and create branches and pull requests. `.env` is ignored by Git; no secret is stored in source control.
+Create the Kind resources (replace `YOUR_GITHUB_TOKEN`; do not commit it):
 
 ```powershell
-Copy-Item .env.example .env
-docker compose run --rm renovate
+kubectl create namespace renovate
+kubectl -n renovate create secret generic renovate-token --from-literal=RENOVATE_TOKEN=YOUR_GITHUB_TOKEN
+kubectl -n renovate create configmap renovate-config --from-file=config.js=config.js
+kubectl -n renovate apply -f k8s/renovate-cronjob.yaml
 ```
 
-## Repositories
+The CronJob runs daily at 02:00. Run it immediately when needed:
 
-Edit only `repositoryUrls` in `config.js`. Each entry must be a full HTTPS GitHub clone URL, for example `https://github.com/owner/repository.git`. Do not provide file paths: Renovate scans the whole repository automatically.
+```powershell
+kubectl -n renovate create job --from=cronjob/renovate renovate-now
+kubectl -n renovate logs -f job/renovate-now
+```
 
-`onboarding: false` and `requireConfig: 'ignored'` allow this one central config to process each repository. Pull requests are created automatically when updates are found; branch protection and the repository's checks still control merging.
+After changing `config.js`, refresh the ConfigMap and restart the next job:
 
-## Schedule
-
-Use `cron/renovate.cron` on the on-prem runner host. Change `/opt/renovate-runner` to the deployment directory, create its `logs` directory, then install it with `crontab -e`. The supplied entry runs daily at 02:00 local server time and writes to `logs/renovate.log`.
-
-## Renovate PR checks
-
-`.github/workflows/pr-verification.yml` runs for pull requests that modify dependency manifests. It executes `npm install` and `npm test` for Node, `mvn test` for Maven, and installs Python requirements followed by `pytest` when tests exist.
+```powershell
+kubectl -n renovate create configmap renovate-config --from-file=config.js=config.js --dry-run=client -o yaml | kubectl apply -f -
+```
