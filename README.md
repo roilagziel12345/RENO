@@ -1,6 +1,8 @@
 # Minimal self-hosted Renovate runner
 
-This is an on-prem Docker runner for Renovate. It automatically discovers supported dependency files anywhere in the selected repositories, including nested `package.json`, `pom.xml`, and `requirements.txt`, then opens GitHub pull requests for available updates.
+This is an on-prem Docker runner for Renovate. It scans nested `package.json`, `pom.xml`, and `requirements.txt` files, then opens GitHub pull requests for available updates.
+
+The runner consists of only four operational files: `config.js`, `compose.yaml`, `.env`, and `cron/renovate.cron`.
 
 ## Setup
 
@@ -13,7 +15,7 @@ docker compose run --rm renovate
 
 ## Repositories
 
-Edit only `repositoryUrls` in `config.js`. Each entry must be a full HTTPS GitHub clone URL, for example `https://github.com/owner/repository.git`. Do not provide file paths: Renovate scans the entire repository itself. The config converts URLs internally because Renovate's GitHub API accepts `owner/repository` identifiers.
+Edit only `repositoryUrls` in `config.js`. Each entry must be a full HTTPS GitHub clone URL, for example `https://github.com/owner/repository.git`. Do not provide file paths: Renovate scans the whole repository automatically.
 
 `onboarding: false` and `requireConfig: 'ignored'` allow this one central config to process each repository. Pull requests are created automatically when updates are found; branch protection and the repository's checks still control merging.
 
