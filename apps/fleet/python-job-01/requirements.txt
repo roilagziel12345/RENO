@@ -1,3 +1,0 @@
-flask==2.0.3
-Werkzeug==2.0.3
-pytest==7.1.2

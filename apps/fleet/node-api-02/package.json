@@ -1,1 +1,0 @@
-{"name":"node-api-02","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('node-api-02 ok')\""},"dependencies":{"koa":"2.13.4","axios":"0.27.2"}}

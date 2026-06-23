@@ -1,1 +1,0 @@
-{"name":"commerce-web","version":"0.1.0","private":true,"scripts":{"test":"node -e \"console.log('commerce-web ok')\""},"dependencies":{"react":"17.0.2","axios":"0.27.2"}}
