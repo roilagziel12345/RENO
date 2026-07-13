@@ -1,0 +1,11 @@
+{
+  "consumers": [
+    {
+      "id": "demo",
+      "repositories": [
+        "https://github.com/roilagziel12345/RENO"
+      ],
+      "artifactoryUrl": ""
+    }
+  ]
+}

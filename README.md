@@ -1,74 +1,74 @@
-﻿# RENO
+# Minimal Renovate SaaS runner
 
-Proof-of-concept monorepo for evaluating Mend Renovate across mixed Node.js, Maven, and Python dependency manifests.
+This repository is a small central Renovate service for many consumers. Each
+consumer supplies repository URLs in one file, the runner scans them on a
+schedule, and Renovate opens dependency PRs immediately. Nothing is merged
+automatically.
 
-## Large-scale Renovate runner
+## Add a consumer
 
-The scale-safe runner lives in `config.js`, which loads `renovate/platform-config.js`. It is designed for one Renovate job per security boundary or client group, not one job per repository.
+Edit only `renovate/consumers.json`:
 
-Repository targets can be supplied in either of these ways:
-
-- `RENOVATE_REPOSITORIES=owner/repo-a,owner/repo-b`
-- `renovate/repositories.json`, using `renovate/repositories.example.json` as the template
-
-The real `renovate/repositories.json` is gitignored so private client repo names do not have to be committed.
-
-Default safety controls:
-
-- `prConcurrentLimit: 5`
-- `prHourlyLimit: 2`
-- `branchConcurrentLimit: 10`
-- no automerge
-- minor and patch updates grouped together
-- all updates require Dependency Dashboard approval before PR creation
-- major updates are labelled for client review
-
-Renovate discovers manifests recursively. You do not need to provide paths for `package.json`, `pom.xml`, `requirements.txt`, or nested monorepo services.
-
-## Running Renovate
-
-GitHub Actions:
-
-- `.github/workflows/renovate-runner.yml`
-- manually with `workflow_dispatch`
-- nightly on the configured cron
-- optionally with a comma-separated repository list input
-
-Jenkins:
-
-- central runner: `renovate/Jenkinsfile`
-- set `RENOVATE_TOKEN` as a Jenkins credential/environment variable
-- optionally pass `RENOVATE_REPOSITORIES`
-
-Local Docker:
-
-```sh
-export RENOVATE_TOKEN=...
-export RENOVATE_REPOSITORIES=owner/repo-a,owner/repo-b
-./renovate/run-renovate.sh
+```json
+{
+  "consumers": [
+    {
+      "id": "client-a",
+      "repositories": [
+        "https://github.com/client-a/api",
+        "https://github.com/client-a/web"
+      ],
+      "artifactoryUrl": ""
+    }
+  ]
+}
 ```
 
-## PR verification
+- `id` must be unique.
+- `repositories` contains full GitHub repository URLs. Renovate discovers
+  `package.json`, `pom.xml`, `requirements.txt`, and nested manifests itself.
+- `artifactoryUrl` is optional and can stay empty during the GitHub test. It is
+  reserved for the consumer's package registry URL; registry credentials are
+  not committed here.
 
-`Jenkinsfile` and `.github/workflows/pr-verification.yml` both detect changed dependency manifests and run only the relevant verification:
+The demo consumer points at this repository. Add more consumer objects or more
+repository URLs without adding another runner or configuration file.
 
-- npm tests for changed `package.json` or `package-lock.json`
-- Maven tests for changed `pom.xml`
-- Python install/tests for changed `requirements.txt`
+## Run the service
 
-This prevents Renovate PR bursts from triggering full monorepo builds for every dependency update.
+Create a GitHub Actions secret named `RENOVATE_TOKEN`. The token must be able to
+read the configured repositories, create branches and PRs, and update issues.
+Then run **Renovate Runner** from the Actions page. It also runs Sunday through
+Thursday at 22:00 UTC and whenever the central configuration changes on `main`.
 
-## Issue-first approval workflow
+For a local test:
 
-Renovate is configured with `dependencyDashboardApproval: true`. That means the
-first output is a Dependency Dashboard issue in each target repository. Renovate
-does not open a PR or trigger CI until an approved user checks an update in that
-issue.
+```sh
+export RENOVATE_TOKEN=github-token
+docker compose -f renovate/docker-compose.yml run --rm renovate
+```
 
-Flow:
+Renovate opens PRs immediately (`dependencyDashboardApproval: false`), limits
+the number of concurrent PRs, groups minor and patch updates, labels majors,
+and never automerges.
 
-1. Renovate scans the repo and updates the dashboard issue.
-2. The client/admin reviews available updates in the issue.
-3. The client/admin checks the update they want.
-4. Renovate opens the PR in that same application repo.
-5. CI runs only for the app directories touched by the PR.
+## Validate client PRs
+
+`.github/workflows/pr-verification.yml` is the client workflow template. Copy
+it into each consumer repository. On a PR it detects changed dependency
+manifests and runs only the relevant checks:
+
+- npm install and tests for Node.js manifests;
+- Maven tests for `pom.xml`;
+- package installation and pytest for Python requirements.
+
+This repository already uses the workflow, so Renovate PRs against the demo
+consumer show whether its Node, Maven, and Python projects still pass.
+
+## Artifactory later
+
+When Artifactory testing starts, set each consumer's `artifactoryUrl` to its
+real package repository endpoint and provide credentials through GitHub Actions
+secrets. Package managers use different Artifactory repository URLs, so the
+field is intentionally recorded but not forced into npm, Maven, or Python
+during this public-registry test.
