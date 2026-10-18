@@ -21,6 +21,7 @@ concurrency:
 jobs:
   dependency-manifest-tests:
     name: Dynamic dependency manifest tests
+    if: ${{ !startsWith(github.head_ref, 'renovate/') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
